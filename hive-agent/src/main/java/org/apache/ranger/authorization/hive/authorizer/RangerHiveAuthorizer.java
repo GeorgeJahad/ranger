@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -157,7 +156,6 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 								appType = "hiveServer2";
 							break;
 
-							/*
 							case HIVEMETASTORE:
 								appType = "hiveMetastore";
 								break;
@@ -166,7 +164,6 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 								appType = "other";
 								break;
 
-							 */
 						}
 					}
 
@@ -374,7 +371,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			RangerRoles rangerRoles = hivePlugin.getRangerRoles();
 			if (rangerRoles != null) {
 				Set<RangerRole> roles = rangerRoles.getRangerRoles();
-				if (CollectionUtils.isNotEmpty(roles)) {
+				if (!roles.isEmpty()) {
 					for (RangerRole rangerRole : roles) {
 						ret.add(rangerRole.getName());
 					}
@@ -385,7 +382,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 		} catch(Exception excp) {
 			throw new HiveAuthzPluginException(excp);
 		} finally {
-			RangerAccessResult accessResult = createAuditEvent(hivePlugin, currentUserName, userNames, HiveOperationType.SHOW_ROLES, HiveAccessType.SELECT, null, result);
+			RangerAccessResult accessResult = createAuditEvent(hivePlugin, currentUserName, userNames, HiveOperationType.SHOW_ROLES, HiveAccessType.SELECT, Collections.emptyList(), result);
 			hivePlugin.evalAuditPolicies(accessResult);
 			auditHandler.processResult(accessResult);
 			auditHandler.flushAudit();
@@ -497,7 +494,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			}
 
 			Set<RangerRole> roles = hivePlugin.getRangerRoleForPrincipal(principalName, type);
-			if (CollectionUtils.isNotEmpty(roles)) {
+			if (!roles.isEmpty()) {
 				for (RangerRole rangerRole : roles) {
 					switch(type) {
 						case "USER":
@@ -823,7 +820,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 
 			List<RangerHiveAccessRequest> requests = new ArrayList<RangerHiveAccessRequest>();
 
-			if(!CollectionUtils.isEmpty(inputHObjs)) {
+			if(!inputHObjs.isEmpty()) {
 				for(HivePrivilegeObject hiveObj : inputHObjs) {
 					RangerHiveResource resource = getHiveResource(hiveOpType, hiveObj, inputHObjs, outputHObjs);
 
@@ -921,7 +918,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 				}
 			}
 
-			if(!CollectionUtils.isEmpty(outputHObjs)) {
+			if(!outputHObjs.isEmpty()) {
 				for(HivePrivilegeObject hiveObj : outputHObjs) {
 					RangerHiveResource resource = getHiveResource(hiveOpType, hiveObj, inputHObjs, outputHObjs);
 
@@ -1227,7 +1224,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			perf = RangerPerfTracer.getPerfTracer(PERF_HIVEAUTH_REQUEST_LOG, "RangerHiveAuthorizer.applyRowFilterAndColumnMasking()");
 		}
 
-		if(CollectionUtils.isNotEmpty(hiveObjs)) {
+		if(!hiveObjs.isEmpty()) {
 			IMetaStoreClient metaStoreClient = getMetaStoreClient();
 
 			for (HivePrivilegeObject hiveObj : hiveObjs) {
@@ -1258,7 +1255,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 						needToTransform = true;
 					}
 
-					if (CollectionUtils.isNotEmpty(hiveObj.getColumns())) {
+					if (!hiveObj.getColumns().isEmpty()) {
 						List<String> columnTransformers = new ArrayList<String>();
 
 						for (String column : hiveObj.getColumns()) {
@@ -1530,8 +1527,8 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 				ret = new RangerHiveResource(objectType, hiveObj.getDbname(), hiveObj.getObjectName());
 				// To suppress PMD violations
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Size of inputs = [" + (CollectionUtils.isNotEmpty(inputs) ? inputs.size() : 0) +
-							", Size of outputs = [" + (CollectionUtils.isNotEmpty(outputs) ? outputs.size() : 0) + "]");
+					LOG.debug("Size of inputs = [" + (!inputs.isEmpty() ? inputs.size() : 0) +
+							", Size of outputs = [" + (!outputs.isEmpty() ? outputs.size() : 0) + "]");
 				}
 
 				setOwnerUser(ret, hiveObj, getMetaStoreClient());
@@ -1592,7 +1589,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 	private HivePrivilegeObject getDatabaseObject(String dbName, List<HivePrivilegeObject> inputs, List<HivePrivilegeObject> outputs) {
 		HivePrivilegeObject ret = null;
 
-		if (CollectionUtils.isNotEmpty(outputs)) {
+		if (!outputs.isEmpty()) {
 			for (HivePrivilegeObject hiveOutPrivObj : outputs) {
 				if (hiveOutPrivObj.getType() == HivePrivilegeObjectType.DATABASE
 						&& dbName.equalsIgnoreCase(hiveOutPrivObj.getDbname())) {
@@ -1601,7 +1598,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			}
 		}
 
-		if (ret == null && CollectionUtils.isNotEmpty(inputs)) {
+		if (ret == null && !inputs.isEmpty()) {
 			for (HivePrivilegeObject hiveInPrivObj : inputs) {
 				if (hiveInPrivObj.getType() == HivePrivilegeObjectType.DATABASE
 						&& dbName.equalsIgnoreCase(hiveInPrivObj.getDbname())) {
@@ -1730,8 +1727,8 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 				case ALTERDATABASE:
 				case ALTERDATABASE_LOCATION:
 				case ALTERDATABASE_OWNER:
-				case ALTERINDEX_PROPS:
-				case ALTERINDEX_REBUILD:
+//				case ALTERINDEX_PROPS:
+//				case ALTERINDEX_REBUILD:
 				case ALTERPARTITION_BUCKETNUM:
 				case ALTERPARTITION_FILEFORMAT:
 				case ALTERPARTITION_LOCATION:
@@ -1770,13 +1767,13 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 				case ALTERVIEW_PROPERTIES:
 				case ALTERVIEW_RENAME:
 				case ALTER_MATERIALIZED_VIEW_REWRITE:
-				case DROPVIEW_PROPERTIES:
+//				case DROPVIEW_PROPERTIES:
 				case MSCK:
 					accessType = HiveAccessType.ALTER;
 				break;
 
 				case DROPFUNCTION:
-				case DROPINDEX:
+//				case DROPINDEX:
 				case DROPTABLE:
 				case DROPVIEW:
 				case DROP_MATERIALIZED_VIEW:
@@ -1784,9 +1781,9 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 					accessType = HiveAccessType.DROP;
 				break;
 
-				case CREATEINDEX:
-					accessType = HiveAccessType.INDEX;
-				break;
+//				case CREATEINDEX:
+//					accessType = HiveAccessType.INDEX;
+//				break;
 
 				case IMPORT:
 					/*
@@ -1820,7 +1817,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 				case QUERY:
 				case SHOW_TABLESTATUS:
 				case SHOW_CREATETABLE:
-				case SHOWINDEXES:
+//				case SHOWINDEXES:
 				case SHOWPARTITIONS:
 				case SHOW_TBLPROPERTIES:
 				case ANALYZE_TABLE:
@@ -1967,7 +1964,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			case ALTERTABLE_PROTECTMODE:
 			case ALTERTABLE_FILEFORMAT:
 			case ALTERTABLE_LOCATION:
-			case ALTERINDEX_PROPS:
+//			case ALTERINDEX_PROPS:
 			case ALTERTABLE_MERGEFILES:
 			case ALTERTABLE_SKEWED:
 			case ALTERTABLE_COMPACT:
@@ -2007,7 +2004,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			case SHOW_CREATETABLE:
 			case SHOWFUNCTIONS:
 			case SHOWVIEWS:
-			case SHOWINDEXES:
+//			case SHOWINDEXES:
 			case SHOWPARTITIONS:
 			case SHOWLOCKS:
 			case SHOWCONF:
@@ -2016,11 +2013,11 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			case CREATEVIEW:
 			case DROPVIEW:
 			case CREATE_MATERIALIZED_VIEW:
-			case CREATEINDEX:
-			case DROPINDEX:
-			case ALTERINDEX_REBUILD:
+//			case CREATEINDEX:
+//			case DROPINDEX:
+//			case ALTERINDEX_REBUILD:
 			case ALTERVIEW_PROPERTIES:
-			case DROPVIEW_PROPERTIES:
+//			case DROPVIEW_PROPERTIES:
 			case DROP_MATERIALIZED_VIEW:
 			case ALTER_MATERIALIZED_VIEW_REWRITE:
 			case LOCKTABLE:
@@ -2630,7 +2627,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 
 	private RangerPolicy getRangerPolicy(Map<String, RangerResourceACLs.AccessResult> accessResults, String rangerACL){
 		RangerPolicy ret = null;
-		if (MapUtils.isNotEmpty(accessResults)) {
+		if (!accessResults.isEmpty()) {
 			RangerResourceACLs.AccessResult accessResult = accessResults.get(rangerACL.toLowerCase());
 			if (accessResult != null) {
 				ret = accessResult.getPolicy();
@@ -2707,7 +2704,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 
 		Map<String, Map<HiveResourceACLs.Privilege, HiveResourceACLs.AccessResult>> ret = new HashMap<>();
 
-		if (MapUtils.isNotEmpty(rangerACLs)) {
+		if (!rangerACLs.isEmpty()) {
 			Set<String> hivePrivileges = new HashSet<>();
 			for (HiveResourceACLs.Privilege privilege : HiveResourceACLs.Privilege.values()) {
 				hivePrivileges.add(privilege.name().toLowerCase());
@@ -2914,7 +2911,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 	private String createRoleString(List<String> roleNames) {
 		String ret = null;
 
-		if (CollectionUtils.isEmpty(roleNames)) {
+		if (roleNames.isEmpty()) {
 			ret = StringUtils.EMPTY;
 		} else {
 			if (roleNames.size() > 1) {
@@ -2930,7 +2927,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 	private String createUserString (List<String> userNames) {
 		String ret = null;
 
-		if (CollectionUtils.isEmpty(userNames)) {
+		if (userNames.isEmpty()) {
 			ret = StringUtils.EMPTY;
 		} else {
 			if (userNames.size() > 1) {
@@ -3047,7 +3044,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			throw new HiveAuthzPluginException(excp);
 		} finally {
 			List<String> roleNames = new ArrayList<>(ret);
-			RangerAccessResult accessResult = createAuditEvent(hivePlugin, currentUserName, roleNames, HiveOperationType.SHOW_ROLES, HiveAccessType.SELECT, null, result);
+			RangerAccessResult accessResult = createAuditEvent(hivePlugin, currentUserName, roleNames, HiveOperationType.SHOW_ROLES, HiveAccessType.SELECT, Collections.emptyList(), result);
 			auditHandler.processResult(accessResult);
 			auditHandler.flushAudit();
 		}
