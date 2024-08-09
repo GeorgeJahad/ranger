@@ -17,23 +17,23 @@
 <!-- # DB Info -->
 	<property>
 		<name>ranger.jpa.jdbc.driver</name>
-		<value>net.sf.log4jdbc.DriverSpy</value>
-		<description></description>
+		<value>org.postgresql.Driver</value>
+		<description />
 	</property>
 	<property>
 		<name>ranger.jpa.jdbc.url</name>
-		<value>jdbc:log4jdbc:mysql://localhost/ranger</value>
-		<description></description>
+		<value>jdbc:postgresql://ranger-db/ranger</value>
+		<description />
 	</property>
 	<property>
 		<name>ranger.jpa.jdbc.user</name>
 		<value>rangeradmin</value>
-		<description></description>
+		<description />
 	</property>
 	<property>
 		<name>ranger.jpa.jdbc.password</name>
-		<value>rangeradmin</value>
-		<description></description>
+		<value>rangerR0cks!</value>
+		<description />
 	</property>
 	<property>
 		<name>ranger.externalurl</name>
